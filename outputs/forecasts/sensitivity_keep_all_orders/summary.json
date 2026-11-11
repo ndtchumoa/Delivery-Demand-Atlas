@@ -1,0 +1,80 @@
+{
+  "protocol": {
+    "protocol_version": 1,
+    "criteria_declared_before_run": true,
+    "relative_mae_threshold": 0.01,
+    "ranking_metric": "validation series-level WAPE",
+    "ranking_rule": "identical full ordering, ties broken by MAE then model name",
+    "mae_rule": "abs(MAE_B - MAE_A) / MAE_A < 0.01 for every baseline",
+    "zero_mae_rule": "if MAE_A is zero, MAE_B must also be zero",
+    "comparison_split": "validation",
+    "scenarios": [
+      "primary_stable_period",
+      "sensitivity_full_period"
+    ],
+    "controls": "same A-derived date windows, union series keys and identical eligible cells; each arm uses its own past demand and labels",
+    "arm_A": "v4 excludes delivery_minutes > 1440",
+    "arm_B": "retain all rows with identical GPS cleaning and flags; count by ds, do not correct timestamps",
+    "ml_followup": "Repeat the same A/B comparison after LightGBM/XGBoost are implemented; not covered by baseline conclusion"
+  },
+  "orders_A": 31407,
+  "orders_B": 31415,
+  "exclusion_reason": "delivery_minutes > 1440; no GPS exclusion",
+  "removed_orders_by_date": {
+    "2022-06-08": 1,
+    "2022-06-18": 1,
+    "2022-07-03": 1,
+    "2022-07-04": 1,
+    "2022-07-10": 1,
+    "2022-07-13": 1,
+    "2022-07-28": 1,
+    "2022-08-28": 1
+  },
+  "results": [
+    {
+      "scenario": "primary_stable_period",
+      "ranking_A": [
+        "rolling_mean_7",
+        "rolling_mean_14",
+        "historical_mean",
+        "historical_weekday",
+        "seasonal_7",
+        "naive_1"
+      ],
+      "ranking_B": [
+        "rolling_mean_7",
+        "rolling_mean_14",
+        "historical_mean",
+        "historical_weekday",
+        "seasonal_7",
+        "naive_1"
+      ],
+      "ranking_unchanged": true,
+      "all_mae_within_threshold": true,
+      "passed": true
+    },
+    {
+      "scenario": "sensitivity_full_period",
+      "ranking_A": [
+        "rolling_mean_7",
+        "rolling_mean_14",
+        "naive_1",
+        "seasonal_7",
+        "historical_mean",
+        "historical_weekday"
+      ],
+      "ranking_B": [
+        "rolling_mean_7",
+        "rolling_mean_14",
+        "naive_1",
+        "seasonal_7",
+        "historical_mean",
+        "historical_weekday"
+      ],
+      "ranking_unchanged": true,
+      "all_mae_within_threshold": true,
+      "passed": true
+    }
+  ],
+  "scope": "baseline validation only; does not establish ML or routing robustness"
+}

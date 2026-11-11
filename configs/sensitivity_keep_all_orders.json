@@ -1,0 +1,15 @@
+{
+  "protocol_version": 1,
+  "criteria_declared_before_run": true,
+  "relative_mae_threshold": 0.01,
+  "ranking_metric": "validation series-level WAPE",
+  "ranking_rule": "identical full ordering, ties broken by MAE then model name",
+  "mae_rule": "abs(MAE_B - MAE_A) / MAE_A < 0.01 for every baseline",
+  "zero_mae_rule": "if MAE_A is zero, MAE_B must also be zero",
+  "comparison_split": "validation",
+  "scenarios": ["primary_stable_period", "sensitivity_full_period"],
+  "controls": "same A-derived date windows, union series keys and identical eligible cells; each arm uses its own past demand and labels",
+  "arm_A": "v4 excludes delivery_minutes > 1440",
+  "arm_B": "retain all rows with identical GPS cleaning and flags; count by ds, do not correct timestamps",
+  "ml_followup": "Repeat the same A/B comparison after LightGBM/XGBoost are implemented; not covered by baseline conclusion"
+}
