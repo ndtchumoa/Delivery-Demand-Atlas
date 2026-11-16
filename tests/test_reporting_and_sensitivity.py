@@ -41,4 +41,3 @@ class ReportingTests(unittest.TestCase):
         self.assertFalse(compareArms(data,.01)[1][0]['ranking_unchanged'])
 
 if __name__=='__main__': unittest.main()
-

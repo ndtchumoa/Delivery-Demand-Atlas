@@ -13,4 +13,3 @@ def featureColumns(excludedGroups=()):
     if set(columns) & set(schema['forbidden']):
         raise ValueError('Forbidden target or evaluation columns in feature schema')
     return columns
-
