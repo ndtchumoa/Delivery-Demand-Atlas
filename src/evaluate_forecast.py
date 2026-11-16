@@ -63,7 +63,7 @@ def summarizeProtocol(data: pd.DataFrame, scenario: str, bounds: dict, selected:
 
 def main() -> None:
     """Score the saved baseline predictions and write metrics and protocol files."""
-    window = json.loads(config.STABLE_PERIOD_FILE.read_text())
+    window = json.loads(config.STABLE_PERIOD_FILE.read_text(encoding="utf-8"))
     predictions = pd.read_csv(config.BASELINE_PREDICTIONS_FILE, parse_dates=[DATE])
     metrics = evaluatePredictions(predictions)
     protocol = []
@@ -71,10 +71,11 @@ def main() -> None:
         data = pd.read_parquet(config.featuresFile(scenario))
         protocol.append(summarizeProtocol(data, scenario, bounds, selectOnValidation(metrics, scenario)))
     metrics.to_csv(config.BASELINE_METRICS_FILE, index=False)
-    config.BASELINE_PROTOCOL_FILE.write_text(json.dumps(protocol, indent=2))
+    config.BASELINE_PROTOCOL_FILE.write_text(json.dumps(protocol, indent=2), encoding="utf-8")
     best = metrics[(metrics.scenario == "primary_stable_period") & (metrics.split == "test") & (metrics.level == "series")]
     print(best.sort_values("wape")[["model", "mae", "rmse", "wape"]].round(4).to_string(index=False))
 
 
 if __name__ == "__main__":
     main()
+

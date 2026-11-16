@@ -32,8 +32,8 @@ def compareArms(metrics, threshold):
 
 def main():
     """Keep the primary outputs intact; write sensitivity results separately. O(N log N)."""
-    protocol = json.loads((config.PROJECT_ROOT/'configs/sensitivity_keep_all_orders.json').read_text())
-    windows = json.loads(config.STABLE_PERIOD_FILE.read_text())['splits']
+    protocol = json.loads((config.PROJECT_ROOT/'configs/sensitivity_keep_all_orders.json').read_text(encoding="utf-8"))
+    windows = json.loads(config.STABLE_PERIOD_FILE.read_text(encoding="utf-8"))['splits']
     flagged, analysis, excluded = buildFlaggedAndAnalysis(addDerivedColumns(loadRawDelivery()))
     arms = {'A':analysis, 'B':flagged}
     panels = {arm:buildDemandPanel(frame) for arm,frame in arms.items()}
@@ -65,7 +65,7 @@ def main():
     report=dict(protocol=protocol,orders_A=len(analysis),orders_B=len(flagged),exclusion_reason='delivery_minutes > 1440; no GPS exclusion',
                 removed_orders_by_date=removed.ds_date.dt.strftime('%Y-%m-%d').value_counts().sort_index().to_dict(),
                 results=summary,scope='baseline validation only; does not establish ML or routing robustness')
-    (out/'summary.json').write_text(json.dumps(report,indent=2))
+    (out/'summary.json').write_text(json.dumps(report,indent=2), encoding="utf-8")
     print(comparison[['scenario','model','mae_A','mae_B','wape_A','wape_B','relative_mae_change']].to_string(index=False))
     print(json.dumps(summary,indent=2))
     return report
@@ -73,3 +73,4 @@ def main():
 
 if __name__=='__main__':
     main()
+

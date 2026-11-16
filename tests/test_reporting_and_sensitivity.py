@@ -11,10 +11,10 @@ from src.sensitivity_keep_all_orders import compareArms
 class ReportingTests(unittest.TestCase):
     def testDisplayedCountMatchesAudit(self):
         summary = loadUnobservedSummary(config.PANEL_AUDIT_FILE)
-        audit = json.loads(config.PANEL_AUDIT_FILE.read_text())
+        audit = json.loads(config.PANEL_AUDIT_FILE.read_text(encoding="utf-8"))
         count = int(re.search(r'\*\*(\d+)\*\*', summary['markdown']).group(1))
         self.assertEqual(count, len(audit['unobserved_city_days']))
-        notebook = json.loads((config.PROJECT_ROOT / 'notebooks/01_eda.ipynb').read_text())
+        notebook = json.loads((config.PROJECT_ROOT / 'notebooks/01_eda.ipynb').read_text(encoding="utf-8"))
         rendered = [o.get('data', {}).get('text/markdown', '') for c in notebook['cells'] for o in c.get('outputs', [])]
         rendered = [''.join(x) if isinstance(x, list) else x for x in rendered]
         self.assertIn(summary['markdown'], rendered)
@@ -41,3 +41,4 @@ class ReportingTests(unittest.TestCase):
         self.assertFalse(compareArms(data,.01)[1][0]['ranking_unchanged'])
 
 if __name__=='__main__': unittest.main()
+

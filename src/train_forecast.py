@@ -54,7 +54,7 @@ def runScenario(panel: pd.DataFrame, scenario: str, bounds: dict):
 def main() -> None:
     """Run the primary window and the full-period sensitivity scenario and save the outputs."""
     panel = loadDemandPanel()
-    window = json.loads(config.STABLE_PERIOD_FILE.read_text())
+    window = json.loads(config.STABLE_PERIOD_FILE.read_text(encoding="utf-8"))
     predictions = []
     for scenario, bounds in window["splits"].items():
         data, pred = runScenario(panel, scenario, bounds)
@@ -67,3 +67,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
