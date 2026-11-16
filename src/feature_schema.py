@@ -5,7 +5,7 @@ from . import config
 
 def featureColumns(excludedGroups=()):
     """Select configured groups; reject unknown groups and target leakage. O(p)."""
-    schema = json.loads((config.PROJECT_ROOT / 'configs/forecast_features.json').read_text())
+    schema = json.loads((config.PROJECT_ROOT / 'configs/forecast_features.json').read_text(encoding="utf-8"))
     unknown = set(excludedGroups) - set(schema['groups'])
     if unknown:
         raise ValueError(f'Unknown feature groups: {unknown}')

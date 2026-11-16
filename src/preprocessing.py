@@ -104,8 +104,8 @@ def buildFlaggedAndAnalysis(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFram
 def dailyActivity(df: pd.DataFrame, dateCol: str = DATE) -> pd.DataFrame:
     """Orders, distinct active couriers and orders per active courier per day.
 
-    Logic: orders = activeCouriers x ordersPerCourier. A fall driven by fewer active couriers
-    reflects a change in who is observed; a fall in ordersPerCourier reflects workload or demand.
+    Logic: orders = activeCouriers x ordersPerCourier within each day. These observed counts
+    describe activity in the sample; they do not identify the cause of a change in demand.
     Complexity: O(n + D) for n orders and D days.
     """
     idx = pd.date_range(df[dateCol].min(), df[dateCol].max(), freq="D")
@@ -114,6 +114,37 @@ def dailyActivity(df: pd.DataFrame, dateCol: str = DATE) -> pd.DataFrame:
     daily["ordersPerCourier"] = daily["orders"] / daily["activeCouriers"].replace(0, np.nan)
     daily.index.name = dateCol
     return daily
+
+
+def decomposeActivityChange(base: pd.DataFrame, comparison: pd.DataFrame) -> dict:
+    """Exact log-ratio decomposition of observed mean daily orders. O(D).
+
+    Productivity is total orders / total active courier-days, not the unweighted mean of
+    daily ratios. Thus mean orders = mean active couriers * productivity in each period,
+    including zero-record days. This accounting identity is descriptive, not causal.
+    A period with no orders or activity has no finite log ratio; an unchanged order mean
+    has no defined component share.
+    """
+    def summarize(frame):
+        counts = frame[["orders", "activeCouriers"]]
+        if (counts.empty or not np.isfinite(counts.to_numpy(dtype=float)).all()
+                or (counts < 0).any().any()
+                or ((counts.orders > 0) & (counts.activeCouriers == 0)).any()):
+            raise ValueError("Expected nonnegative finite daily counts and couriers for every order.")
+        totals = counts.sum()
+        if totals.orders <= 0 or totals.activeCouriers <= 0:
+            raise ValueError("Each period must have positive total orders and active courier-days.")
+        return dict(orders_per_day=float(totals.orders / len(counts)),
+                    couriers_per_day=float(totals.activeCouriers / len(counts)),
+                    orders_per_courier_day=float(totals.orders / totals.activeCouriers))
+
+    before, after = summarize(base), summarize(comparison)
+    orderChange = float(np.log(before["orders_per_day"] / after["orders_per_day"]))
+    courierChange = float(np.log(before["couriers_per_day"] / after["couriers_per_day"]))
+    productivityChange = float(np.log(before["orders_per_courier_day"] / after["orders_per_courier_day"]))
+    return dict(base=before, comparison=after, order_log_ratio=orderChange,
+                courier_log_ratio=courierChange, productivity_log_ratio=productivityChange,
+                courier_log_share=(courierChange / orderChange if not np.isclose(orderChange, 0) else None))
 
 
 def _bestSplit(cum: np.ndarray, cum2: np.ndarray, lo: int, hi: int, minSegment: int) -> Tuple[int, float]:
@@ -284,7 +315,7 @@ def main() -> None:
     exclusionLog.to_csv(config.EXCLUDED_LOG_FILE, index=False)
 
     window = selectStableWindow(dailyActivity(analysis))
-    config.STABLE_PERIOD_FILE.write_text(json.dumps(window, indent=2))
+    config.STABLE_PERIOD_FILE.write_text(json.dumps(window, indent=2), encoding="utf-8")
 
     panel = buildDemandPanel(analysis, (window["start"], window["end"]))
     lookup = buildAoiLookup(analysis)
@@ -296,7 +327,7 @@ def main() -> None:
     detail.to_csv(config.AOI_REGION_DAILY_FILE, index=False)
     lookup.to_csv(config.AOI_LOOKUP_FILE, index=False)
     compareAggregation(panel, aoiPanel, (window["start"], window["end"])).to_csv(config.AGGREGATION_FILE, index=False)
-    config.PANEL_AUDIT_FILE.write_text(json.dumps(audit, indent=2))
+    config.PANEL_AUDIT_FILE.write_text(json.dumps(audit, indent=2), encoding="utf-8")
 
     # Lookups estimated on the training orders of each scenario, for the routing stage.
     for scenario, bounds in window["splits"].items():
