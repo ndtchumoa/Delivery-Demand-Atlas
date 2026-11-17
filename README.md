@@ -84,3 +84,22 @@ Kết quả baseline: thứ hạng sáu mô hình không đổi ở cả hai c�
 6. Chạy CVRP S0–S3 trên validation. Sau khi chốt, lưu cấu hình thực tế vào `configs/routing_locked.json` rồi commit trước khi chạy test.
 
 Cấu hình định tuyến khóa phải chứa: quy tắc và phiên bản ánh xạ AOI/cụm, depot và dữ liệu train nguồn, F/Q, quy tắc chia xe/dự trữ, tách nút, phạt bỏ nút, chiến lược/timing/seed solver nếu có, đơn vị và cách làm tròn khoảng cách, lambda, epsilon Gap closed và tập ngày đánh giá. Hiện chưa tạo file `routing_locked.json` vì solver và các tham số thực tế chưa được triển khai.
+
+
+## Đặc trưng không gian và ML: validation
+
+Thiết kế và kế hoạch: [docs/04_spatial_ml_design.md](docs/04_spatial_ml_design.md).
+Kết quả: [docs/04_ml_validation_results.md](docs/04_ml_validation_results.md) và [notebook](notebooks/04_ml_validation.ipynb).
+
+```bash
+python -m pip install -r requirements.txt
+python -m src.preprocessing
+python -m src.train_ml --scenario all
+python -m unittest discover -s tests -v
+```
+
+Lệnh ML mặc định chạy cửa sổ chính; `--scenario all` thêm độ nhạy toàn kỳ.
+Đợt này chỉ chấm validation, chưa chấm test ML. Kết quả lưu trong
+`outputs/forecasts/ml_validation/`; hai mô hình full có định dạng native kèm schema mã hoá.
+Thống kê không gian của dòng train chỉ dùng các ngày trước đó; validation dùng lookup cuối train.
+ML hiện chưa vượt baseline rolling 7 ngày trên validation; chưa có kết luận hiệu quả định tuyến.
