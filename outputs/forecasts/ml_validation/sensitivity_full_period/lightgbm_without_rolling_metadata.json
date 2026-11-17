@@ -1,0 +1,100 @@
+{
+  "candidate": "lightgbm_without_rolling_06",
+  "parameters": {
+    "num_leaves": 15,
+    "min_child_samples": 50,
+    "n_estimators": 100
+  },
+  "input_columns": [
+    "day_of_week",
+    "is_weekend",
+    "day_of_month",
+    "month",
+    "lag_1",
+    "lag_7",
+    "lag_14",
+    "region_id",
+    "aoi_type",
+    "centroid_lng",
+    "centroid_lat",
+    "historical_density",
+    "spatial_fallback"
+  ],
+  "encoded_columns": [
+    "day_of_week__0",
+    "day_of_week__1",
+    "day_of_week__2",
+    "day_of_week__3",
+    "day_of_week__4",
+    "day_of_week__5",
+    "day_of_week__6",
+    "is_weekend",
+    "day_of_month",
+    "month",
+    "lag_1",
+    "lag_7",
+    "lag_14",
+    "region_id__0",
+    "region_id__1",
+    "region_id__2",
+    "region_id__3",
+    "aoi_type__0",
+    "aoi_type__1",
+    "aoi_type__2",
+    "aoi_type__3",
+    "aoi_type__4",
+    "aoi_type__5",
+    "aoi_type__6",
+    "aoi_type__7",
+    "aoi_type__8",
+    "aoi_type__9",
+    "aoi_type__10",
+    "aoi_type__11",
+    "aoi_type__12",
+    "aoi_type__13",
+    "centroid_lng",
+    "centroid_lat",
+    "historical_density",
+    "spatial_fallback"
+  ],
+  "category_vocabulary": {
+    "region_id": [
+      31,
+      53,
+      129,
+      165
+    ],
+    "aoi_type": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "day_of_week": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  "unknown_category_policy": "all zero",
+  "seed": 2026,
+  "excluded_groups": [
+    "rolling"
+  ],
+  "train_rows": 2952,
+  "validation_rows": 1394
+}

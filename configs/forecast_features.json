@@ -1,12 +1,44 @@
 {
   "groups": {
-    "calendar": ["day_of_week", "is_weekend", "day_of_month", "month"],
-    "lag": ["lag_1", "lag_7", "lag_14"],
-    "rolling": ["rolling_mean_7", "rolling_std_7", "rolling_mean_14", "rolling_std_14"],
-    "spatial": ["region_id", "aoi_type"]
+    "calendar": [
+      "day_of_week",
+      "is_weekend",
+      "day_of_month",
+      "month"
+    ],
+    "lag": [
+      "lag_1",
+      "lag_7",
+      "lag_14"
+    ],
+    "rolling": [
+      "rolling_mean_7",
+      "rolling_std_7",
+      "rolling_mean_14",
+      "rolling_std_14"
+    ],
+    "spatial": [
+      "region_id",
+      "aoi_type",
+      "centroid_lng",
+      "centroid_lat",
+      "historical_density",
+      "spatial_fallback"
+    ]
   },
-  "categorical": ["region_id", "aoi_type", "day_of_week"],
-  "forbidden": ["demand", "observed_demand", "prediction", "split", "history_ready", "city_observed", "zero_assumed"],
-  "pending_train_only_spatial": ["centroid_lng", "centroid_lat", "historical_density"],
-  "note": "Weekday features remain candidates for RQ2 ablation; year 2022 is assumed. Pending spatial columns are not active features."
+  "categorical": [
+    "region_id",
+    "aoi_type",
+    "day_of_week"
+  ],
+  "forbidden": [
+    "demand",
+    "observed_demand",
+    "prediction",
+    "split",
+    "history_ready",
+    "city_observed",
+    "zero_assumed"
+  ],
+  "note": "Spatial training rows use earlier train dates; validation/test freeze at train end. Density = orders/AOI/observed day. Categories encoded with train-only one-hot vocabulary, unseen values all zero. Weekday/year 2022 remains an assumption."
 }
