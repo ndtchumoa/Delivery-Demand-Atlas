@@ -62,4 +62,4 @@ Delta dương nghĩa là bỏ nhóm làm tăng sai số; delta âm nghĩa là b�
 3. Nếu mở rộng loss hoặc mô hình residual quanh rolling mean, ghi thành thí nghiệm validation phiên bản mới trước khi chạy.
 4. Chốt giao thức test và vai trò của baseline/ML trong S2; sau đó chuẩn bị depot chung từ train, vùng phân bổ, F/Q và CVRP.
 
-Chi tiết thiết kế và lệnh tái lập: [04_spatial_ml_design.md](04_spatial_ml_design.md).
+Chi tiết thiết kế và lệnh tái lập: [spatial_ml_design.md](spatial_ml_design.md).

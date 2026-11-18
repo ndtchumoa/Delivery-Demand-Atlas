@@ -1,117 +1,85 @@
-# Dự đoán nhu cầu giao hàng theo cụm AOI và tối ưu tuyến chặng cuối (LaDe-D Jilin)
+# Dự báo nhu cầu và tối ưu tuyến giao hàng chặng cuối
 
-Môn MI3380. Dữ liệu: LaDe-D, thành phố Jilin (`data/raw/delivery_jl.csv`, 31.415 đơn, 12/5–28/10).
-Dự báo số đơn nhận mỗi ngày theo `region_id × aoi_type`; bước tối ưu tuyến CVRP (OR-Tools) dùng AOI làm nút.
+Đây là repo đồ án MI3380 sử dụng dữ liệu giao hàng LaDe-D tại Jilin. Bài toán dự báo hỏi mỗi vùng và loại AOI sẽ **tiếp nhận bao nhiêu đơn vào ngày mai**. Kết quả đó dự kiến dùng để chia xe trước ca. Khi danh sách đơn thực tế đã có, bước định tuyến sẽ dùng OR-Tools để xếp các điểm giao vào tuyến theo tải trọng xe.
 
-## Trạng thái
+Repo hiện chạy được phần làm sạch dữ liệu, dự báo và đánh giá. Phần phân bổ xe và định tuyến có thiết kế trong [đề cương chi tiết](reports/project_proposal.md). Số liệu trên trang này là kết quả dự báo.
 
-| Hạng mục | Trạng thái |
-|---|---|
-| Làm sạch, kiểm tra chất lượng, EDA | Hoàn thành (`notebooks/01_eda.ipynb`) |
-| Bảng nhu cầu (41 chuỗi × 170 ngày; 1.259 AOI × 170 ngày) | Hoàn thành |
-| Đặc trưng một-ngày-trước, chia theo thời gian, kiểm tra rò rỉ | Hoàn thành (`02_features.ipynb`) |
-| Baseline dự báo và đánh giá | Hoàn thành (`03_forecasting.ipynb`) |
-| Mô hình học máy (LightGBM/XGBoost) | Đã đánh giá trên validation (`04_ml_validation.ipynb`) |
-| Demo dự báo trước một ngày | Hoàn thành. So sánh ba mô hình trên validation và xem baseline đã chọn trên test. |
-| Cụm AOI, CVRP và kịch bản S0–S3 | Chưa triển khai (`04_routing.ipynb` chưa có) |
+## Mở demo
 
-## Cấu trúc
+Tải [forecast_jilin.html](outputs/forecasts/demo/forecast_jilin.html) và mở bằng trình duyệt. Demo chạy offline. Chọn tập đánh giá, ngày, vùng hoặc loại AOI để xem số đơn thực tế và dự báo. Tập validation hiển thị cả ba mô hình. Tập test hiển thị baseline đã chọn trên validation.
 
-```
-data/raw/                 dữ liệu gốc (không sửa)
-data/processed/           bảng đã xử lý, bảng đặc trưng, cấu hình cửa sổ ổn định
-src/config.py             đường dẫn và tham số chung
-src/data_loader.py        đọc dữ liệu thô, tập phân tích, bảng nhu cầu
-src/preprocessing.py      làm sạch, cờ chất lượng, cửa sổ ổn định, bảng nhu cầu và AOI
-src/features.py           lag, trung bình trượt, đặc trưng lịch
-src/train_forecast.py     baseline dự báo
-src/evaluate_forecast.py  MAE, RMSE, WAPE; chọn mô hình trên tập kiểm định
-src/build_forecast_demo.py tạo demo từ dự báo và chỉ số đã lưu
-src/visualization.py      hàm vẽ dùng chung
-notebooks/                01_eda, 02_features, 03_forecasting
-outputs/forecasts/        dự báo, chỉ số, giao thức đánh giá
-outputs/figures/          hình do notebook tạo
-tests/                    kiểm thử đơn vị
-```
+- [forecast_jilin_predictions.csv](outputs/forecasts/demo/forecast_jilin_predictions.csv) có 1.640 dòng. Mỗi dòng ứng với một ngày và một cặp vùng × loại AOI. Cột dự báo LightGBM và XGBoost ở tập test để trống vì hai mô hình chưa được chấm trên tập đó.
+- [forecast_jilin_metrics.csv](outputs/forecasts/demo/forecast_jilin_metrics.csv) lưu MAE, RMSE và WAPE theo mô hình, tập đánh giá và cấp tổng hợp. Giá trị WAPE trong CSV ở dạng tỷ lệ, ví dụ `0.2122` tương ứng khoảng `21.22%`.
 
-## Chạy lại
+## Dữ liệu và cách đánh giá
+
+Tệp [delivery_jl.csv](data/raw/delivery_jl.csv) có 31.415 đơn. Bước làm sạch chuyển tọa độ giữ chỗ gần (0, 0) thành giá trị thiếu và loại 8 đơn có thời lượng giao trên 24 giờ khỏi tập phân tích. Dữ liệu gốc được giữ nguyên. Tập phân tích còn 31.407 đơn và tạo ra bảng 41 chuỗi trên lịch 170 ngày. Từng chuỗi là một cặp `region_id × aoi_type`. Bảng ở cấp `aoi_id` được giữ riêng để phân tích vị trí và chuẩn bị cho bài toán tuyến. [Nhật ký loại đơn](data/processed/excluded_rows.csv) · [Kiểm tra bảng nhu cầu](data/processed/panel_audit.json)
+
+Ngày dự báo lấy theo ngày tiếp nhận đơn `ds`. Khi thành phố có dữ liệu nhưng một chuỗi không có đơn, nhu cầu của chuỗi đó là 0. Bảy ngày thiếu bản ghi trên toàn thành phố được đánh dấu chưa quan sát. Các ngày này được bỏ qua khi chấm điểm và giữ là giá trị thiếu trong lịch sử. Tệp gốc chỉ ghi tháng và ngày, vì vậy năm 2022 là quy ước dùng khi xử lý thời gian và tạo đặc trưng thứ trong tuần.
+
+| Cửa sổ | Train | Validation | Test | Số ngày test đủ điều kiện |
+|---|---|---|---|---:|
+| Cửa sổ ổn định | 27/06–23/08 | 24/08–12/09 | 13/09–02/10 | 20/20 |
+| Toàn kỳ, dùng để kiểm tra độ nhạy | 12/05–21/08 | 22/08–24/09 | 25/09–28/10 | 14/34 |
+
+*Ngày trong bảng được ghi theo thứ tự ngày/tháng và tính cả hai đầu mút.* [Mốc chia tập](data/processed/stable_period.json) · [Giao thức chấm baseline](outputs/forecasts/baseline_protocol.json)
+
+Dự báo ngày t dùng lịch sử đã quan sát đến hết ngày t−1. Các đặc trưng gồm lịch, lag 1/7/14 ngày, thống kê trượt 7/14 ngày và các thống kê không gian. Dòng train chỉ dùng dữ liệu không gian có trước ngày dự báo. Validation dùng bảng tra không gian đã cố định ở cuối train. Cấu hình mô hình được chọn bằng WAPE cấp chuỗi trên validation. Khi chấm cấp vùng, cộng dự báo và số đơn thực tế theo vùng–ngày trước khi tính sai số. [Thiết kế đặc trưng và mô hình](docs/spatial_ml_design.md)
+
+## Kết quả dự báo
+
+| Tập | Mô hình | MAE cấp chuỗi | RMSE cấp chuỗi | WAPE cấp chuỗi | WAPE cấp vùng |
+|---|---|---:|---:|---:|---:|
+| Validation | Trung bình trượt 7 ngày | 1,3716 | 3,4199 | **21,22%** | **13,73%** |
+| Validation | LightGBM | 1,6075 | 3,9034 | 24,87% | 16,05% |
+| Validation | XGBoost | 1,6793 | 3,9246 | 25,98% | 16,27% |
+| Test | Trung bình trượt 7 ngày | 1,3115 | 3,2093 | 22,73% | 14,94% |
+
+Validation và test của cửa sổ chính đều có 820 ô chuỗi–ngày. Tổng nhu cầu tương ứng là 5.300 và 4.732 đơn. Trung bình trượt 7 ngày có WAPE thấp nhất trên validation ở cả hai cấp. LightGBM là mô hình học máy tốt hơn trong hai cấu hình đầy đủ. Kết quả bỏ từng nhóm đặc trưng và so sánh trên cửa sổ toàn kỳ nằm trong [báo cáo validation](docs/ml_validation_results.md).
+
+Cửa sổ ổn định được chọn sau khi quan sát toàn kỳ. Quy tắc loại đơn kéo dài cũng cần biết thời điểm giao xong. Do đó, các kết quả trên là đánh giá hồi cứu trên tập phân tích. Kiểm tra giữ đủ 8 đơn đã hoàn thành cho baseline. Độ nhạy tương ứng của LightGBM và XGBoost vẫn cần đánh giá.
+
+## Chạy lại từ repo
+
+Chạy các lệnh ở thư mục gốc. Môi trường dùng để ghi kết quả ML đã lưu là Python 3.12.14 trên Linux. Trên Windows, có thể tạo môi trường riêng bằng `py -3.12 -m venv .venv` rồi kích hoạt bằng `.\.venv\Scripts\Activate.ps1`. Các phiên bản thư viện dùng trong lần chạy ML được ghi trong [requirements_ml_tested.txt](requirements_ml_tested.txt) và [run_manifest.json](outputs/forecasts/ml_validation/run_manifest.json).
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 python -m src.preprocessing
 python -m src.train_forecast
 python -m src.evaluate_forecast
+```
+
+`src.preprocessing` tạo cả các tệp Parquet cấp đơn được dùng khi huấn luyện. Cài các phiên bản đã ghi nếu cần đối chiếu sát môi trường thử nghiệm. Lệnh `--scenario all` chạy cửa sổ chính và toàn kỳ.
+
+```bash
+python -m pip install -r requirements_ml_tested.txt
+python -m src.train_ml --scenario all
+python -m src.sensitivity_keep_all_orders
 python -m unittest discover -s tests -v
 ```
 
-Các notebook chạy theo thứ tự `01_eda` → `02_features` → `03_forecasting`; mỗi notebook tự gọi các bước cần thiết và kết thúc bằng phần Kết luận.
-
-## Quy ước và giả định
-
-- `ds` là ngày nhận đơn; đại lượng dự báo là số đơn nhận mỗi ngày.
-- Tệp gốc không bị sửa. Tọa độ gần (0,0) được đặt về NaN; 8 đơn có thời gian giao trên 24 giờ bị loại khỏi tập phân tích và ghi trong `data/processed/excluded_rows.csv`; đơn thiếu `accept_gps` hoặc có thời gian giao bằng 0 được giữ và đánh cờ.
-- Tệp không ghi năm; năm 2022 là quy ước kỹ thuật, nên đặc trưng thứ trong tuần không phải kết luận thực nghiệm.
-- Ngày toàn thành phố không có đơn nào là ngày không quan sát, không phải nhu cầu bằng 0.
-- Cửa sổ chính 27/6–2/10: huấn luyện 27/6–23/8, kiểm định 24/8–12/9, kiểm tra 13/9–2/10. Toàn kỳ 12/5–28/10 được chạy như kịch bản độ nhạy.
-
-## Kết quả hiện có
-
-Trên tập kiểm tra của cửa sổ chính (820 ô = 41 chuỗi × 20 ngày, 4.732 đơn), baseline `rolling_mean_7` (được chọn trên tập kiểm định) đạt MAE 1,3115, RMSE 3,2093, WAPE 22,73% ở cấp chuỗi; WAPE 14,94% sau khi cộng theo `region_id`.
-
-### Demo dự báo Jilin
-
-Tải [Demo_Du_bao_Jilin.html](outputs/forecasts/demo/Demo_Du_bao_Jilin.html) và mở bằng trình duyệt. Demo chạy offline và hỗ trợ xem số đơn thực tế, dự báo theo ngày, vùng và loại AOI. Cửa sổ chính có 820 dòng validation (5.300 đơn) và 820 dòng test (4.732 đơn). Validation so sánh trung bình trượt 7 ngày, LightGBM và XGBoost. Test hiển thị trung bình trượt 7 ngày, baseline được chọn trên validation.
-
-- [Dự báo chi tiết](outputs/forecasts/demo/Du_bao_Jilin.csv)
-- [Chỉ số đánh giá](outputs/forecasts/demo/Chi_so_Du_bao_Jilin.csv)
-
-Để tạo lại demo từ các kết quả đã lưu trong repo, chạy từ thư mục gốc:
+Để tạo lại demo bằng các dự báo ML đã lưu trong repo, chạy lệnh dưới đây. Script chạy lại baseline, đối chiếu khóa chuỗi–ngày và chỉ số với các bảng hiện có, rồi xuất HTML và hai CSV vào `outputs/forecasts/demo/`.
 
 ```bash
 python -m src.build_forecast_demo
 ```
 
-## Giới hạn
+## Đọc notebook
 
-- Cửa sổ ổn định, việc loại 8 đơn trên 24 giờ và danh mục AOI đều dựa trên toàn bộ dữ liệu quan sát, nên đánh giá mang tính hồi cứu.
-- Nguyên nhân của đợt giảm đơn từ 3/10 không được ghi trong tài liệu bộ dữ liệu; phân tích chỉ cho thấy phần lớn mức giảm đi cùng số shipper hoạt động giảm.
-- Trong kịch bản toàn kỳ chỉ 14 trong 34 ngày kiểm tra có thể chấm điểm.
+| Tệp | Nội dung |
+|---|---|
+| [01_eda.ipynb](notebooks/01_eda.ipynb) | Chất lượng dữ liệu, nhu cầu, phân bố AOI và cửa sổ ổn định |
+| [02_features.ipynb](notebooks/02_features.ipynb) | Đặc trưng thời gian, độ trễ và cách chia tập |
+| [03_baseline_forecast.ipynb](notebooks/03_baseline_forecast.ipynb) | Kết quả và sai số của các baseline |
+| [04_ml_validation.ipynb](notebooks/04_ml_validation.ipynb) | LightGBM, XGBoost, so sánh với baseline và ablation |
+| [05_keep_all_orders_sensitivity.ipynb](notebooks/05_keep_all_orders_sensitivity.ipynb) | Phân tích bổ sung khi giữ 8 đơn giao trên 24 giờ |
 
-## Đồng bộ thiết kế và kiểm tra trước commit
+Mã dùng chung ở `src/`, thiết lập thực nghiệm ở `configs/` và kiểm thử ở `tests/`. `data/raw/` chứa dữ liệu nguồn, `data/processed/` chứa bảng sau xử lý. `outputs/` chứa chỉ số, dự báo, mô hình đã lưu và hình vẽ. `docs/` giải thích thiết kế và kết quả chạy. `reports/` chứa đề cương và tài liệu tham khảo. [Bài báo dữ liệu LaDe](reports/lade_paper_2306.10675v3.pdf)
 
-Tâm GPS tiếp nhận của từng region là thống kê mô tả về phân bố không gian của điểm tiếp nhận; không dùng làm vị trí kho. Theo v4, hệ thống dùng một depot chung, xác định riêng bằng dữ liệu train ở bước chuẩn bị định tuyến. Hiện chưa có cấu hình CVRP hoặc vị trí depot đã fit.
+## Quy ước đặt tên tệp
 
-Danh sách cột học máy dùng chung tại `configs/forecast_features.json`, đọc qua `src.feature_schema.featureColumns()`. Cả LightGBM và XGBoost phải sử dụng danh sách này; ablation bỏ cột theo nhóm. Giữ `day_of_week` và `is_weekend` làm ứng viên RQ2. Centroid và mật độ AOI được tính từ lịch sử train phù hợp với từng dòng, như mô tả trong [thiết kế đặc trưng không gian](docs/04_spatial_ml_design.md). Không dùng `demand`, `observed_demand` hoặc các cột đánh giá làm đầu vào.
-
-### Độ nhạy giữ đủ đơn
-
-Chạy `python -m src.sensitivity_keep_all_orders` hoặc notebook `02_sensitivity_keep_all_orders.ipynb`. Giao thức và tiêu chí được khai báo trước lần chạy đầu trong `configs/sensitivity_keep_all_orders.json`. Đánh giá validation, cùng cửa sổ và cùng ô, A loại đơn >24 giờ, B giữ đủ đơn với cùng làm sạch GPS. Kết quả nằm riêng tại `outputs/forecasts/sensitivity_keep_all_orders/`, không ghi đè baseline chính.
-
-Kết quả baseline: thứ hạng sáu mô hình không đổi ở cả hai cửa sổ; thay đổi MAE tương đối lớn nhất khoảng 0,136%, nhỏ hơn ngưỡng 1%. Quy tắc loại 8 đơn không thay đổi kết luận lựa chọn baseline trên validation trong giao thức này. Chưa suy rộng sang LightGBM/XGBoost hoặc định tuyến; phải chạy lại A/B sau khi có mô hình học máy.
-
-### Thứ tự công việc tiếp theo
-
-1. Lặp đánh giá độ nhạy giữ đủ đơn với LightGBM và XGBoost.
-2. Xác định ánh xạ AOI, depot chung và F/Q bằng train, rồi kiểm tra AOI mới và AOI đa region.
-3. Chạy CVRP S0–S3 trên validation. Sau khi chốt, lưu cấu hình thực tế vào `configs/routing_locked.json` rồi commit trước khi chạy test.
-
-Cấu hình định tuyến khóa phải chứa: quy tắc và phiên bản ánh xạ AOI/cụm, depot và dữ liệu train nguồn, F/Q, quy tắc chia xe/dự trữ, tách nút, phạt bỏ nút, chiến lược/timing/seed solver nếu có, đơn vị và cách làm tròn khoảng cách, lambda, epsilon Gap closed và tập ngày đánh giá. Hiện chưa tạo file `routing_locked.json` vì solver và các tham số thực tế chưa được triển khai.
-
-
-## Đặc trưng không gian và ML: validation
-
-Thiết kế và kế hoạch: [docs/04_spatial_ml_design.md](docs/04_spatial_ml_design.md).
-Kết quả: [docs/04_ml_validation_results.md](docs/04_ml_validation_results.md) và [notebook](notebooks/04_ml_validation.ipynb).
-
-```bash
-python -m pip install -r requirements.txt
-python -m src.preprocessing
-python -m src.train_ml --scenario all
-python -m unittest discover -s tests -v
-```
-
-Lệnh ML mặc định chạy cửa sổ chính; `--scenario all` thêm độ nhạy toàn kỳ.
-Đợt này chỉ chấm validation, chưa chấm test ML. Kết quả lưu trong
-`outputs/forecasts/ml_validation/`; hai mô hình full có định dạng native kèm schema mã hoá.
-Thống kê không gian của dòng train chỉ dùng các ngày trước đó; validation dùng lookup cuối train.
-ML hiện chưa vượt baseline rolling 7 ngày trên validation; chưa có kết luận hiệu quả định tuyến.
+- Tên do dự án tạo dùng từ tiếng Anh, chữ thường, chữ số và dấu gạch dưới. Phần mở rộng viết thường. Ví dụ `forecast_jilin_metrics.csv`, `spatial_ml_design.md` và `test_pipeline.py`.
+- Notebook dùng `NN_<topic>.ipynb`, trong đó `NN` là số hai chữ số duy nhất theo thứ tự đọc. Các tệp khác dùng tên mô tả trực tiếp nội dung, ví dụ `<subject>_<artifact>.<ext>`.
+- Khi hai lần chạy dùng cùng một giao thức nhưng khác cửa sổ dữ liệu, giữ tên tệp đầu ra giống nhau trong thư mục kịch bản riêng. Ví dụ `ml_validation/primary_stable_period/validation_metrics.csv` và `ml_validation/sensitivity_full_period/validation_metrics.csv`.
+- Giữ nguyên tên chuẩn của công cụ hoặc tài liệu nguồn, như `README.md`, `.gitignore`, `delivery_jl.csv` và mã phiên bản arXiv trong tên file PDF. Khi đổi một tên do dự án tạo, cập nhật luôn lệnh, đường dẫn xuất, liên kết và tên tệp tải xuống liên quan.

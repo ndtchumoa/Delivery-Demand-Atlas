@@ -245,7 +245,7 @@ ui.download.addEventListener("click", () => {
   const url = URL.createObjectURL(new Blob([data.csv], { type:"text/csv;charset=utf-8" }));
   const a = document.createElement("a");
   a.href = url;
-  a.download = "Du_bao_Jilin.csv";
+  a.download = "forecast_jilin_predictions.csv";
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });

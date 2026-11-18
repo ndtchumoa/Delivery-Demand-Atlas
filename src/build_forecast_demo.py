@@ -72,9 +72,9 @@ def buildDemo(output=OUTPUT_DIR):
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
 
     output.mkdir(parents=True, exist_ok=True)
-    (output / "Demo_Du_bao_Jilin.html").write_text(template.replace(placeholder, payload), encoding="utf-8", newline="\n")
-    (output / "Du_bao_Jilin.csv").write_text(csv, encoding="utf-8", newline="\n")
-    metrics.to_csv(output / "Chi_so_Du_bao_Jilin.csv", index=False, encoding="utf-8", lineterminator="\n",
+    (output / "forecast_jilin.html").write_text(template.replace(placeholder, payload), encoding="utf-8", newline="\n")
+    (output / "forecast_jilin_predictions.csv").write_text(csv, encoding="utf-8", newline="\n")
+    metrics.to_csv(output / "forecast_jilin_metrics.csv", index=False, encoding="utf-8", lineterminator="\n",
                    float_format="%.12g")
     print(metrics.loc[metrics.level.eq("series")].to_string(index=False))
 

@@ -1,6 +1,6 @@
 # Kế hoạch và thiết kế đặc trưng không gian – dự báo ML
 
-Ngày: 17/11/2026. Cơ sở: `main` tại `65dab315`; đề cương MI3380 trong `reports/De_cuong_chi_tiet_MI3380.docx`.
+Ngày: 17/11/2026. Cơ sở: `main` tại `65dab315`; [đề cương MI3380](../reports/project_proposal.md).
 
 Người dùng đã chọn **chỉ chạy validation trong đợt này**. Chưa chấm test ML. Đợt này hoàn thiện đặc trưng không gian, hai mô hình học máy, so sánh baseline, importance và ablation. Kết quả trên validation là kết quả phát triển, chưa phải kết luận cuối về RQ1–RQ2.
 
@@ -100,12 +100,12 @@ Mỗi scenario trong `outputs/forecasts/ml_validation/` có:
 | `*_metadata.json` | Cấu hình được chọn, cột mã hoá và danh mục train |
 | `*_full.txt`, `*_full.json` | Hai mô hình full, định dạng native; ablation giữ metadata và kết quả để giảm dung lượng |
 
-`run_manifest.json` ghi phiên bản môi trường và SHA-256 đầu vào, code và cấu hình. `requirements-ml-tested.txt` ghi các phiên bản lõi đã chạy, không phải khoá toàn bộ phụ thuộc notebook. Chưa xác minh chạy ML trên Windows/Python 3.13; cần tái chạy ở máy người dùng trước khi tuyên bố tương thích môi trường đó.
+`run_manifest.json` ghi phiên bản môi trường và SHA-256 đầu vào, code và cấu hình. `requirements_ml_tested.txt` ghi các phiên bản lõi đã chạy, không phải khoá toàn bộ phụ thuộc notebook. Chưa xác minh chạy ML trên Windows/Python 3.13; cần tái chạy ở máy người dùng trước khi tuyên bố tương thích môi trường đó.
 
 ```bash
 python -m pip install -r requirements.txt
 # Tuỳ chọn dùng đúng phiên bản lõi đã kiểm chứng:
-python -m pip install -r requirements-ml-tested.txt
+python -m pip install -r requirements_ml_tested.txt
 python -m src.preprocessing
 python -m src.train_ml --scenario all
 python -m unittest discover -s tests -v
