@@ -11,7 +11,8 @@ Dự báo số đơn nhận mỗi ngày theo `region_id × aoi_type`; bước t�
 | Bảng nhu cầu (41 chuỗi × 170 ngày; 1.259 AOI × 170 ngày) | Hoàn thành |
 | Đặc trưng một-ngày-trước, chia theo thời gian, kiểm tra rò rỉ | Hoàn thành (`02_features.ipynb`) |
 | Baseline dự báo và đánh giá | Hoàn thành (`03_forecasting.ipynb`) |
-| Mô hình học máy (LightGBM/XGBoost) | Chưa triển khai |
+| Mô hình học máy (LightGBM/XGBoost) | Đã đánh giá trên validation (`04_ml_validation.ipynb`) |
+| Demo dự báo trước một ngày | Hoàn thành. So sánh ba mô hình trên validation và xem baseline đã chọn trên test. |
 | Cụm AOI, CVRP và kịch bản S0–S3 | Chưa triển khai (`04_routing.ipynb` chưa có) |
 
 ## Cấu trúc
@@ -25,6 +26,7 @@ src/preprocessing.py      làm sạch, cờ chất lượng, cửa sổ ổn đ�
 src/features.py           lag, trung bình trượt, đặc trưng lịch
 src/train_forecast.py     baseline dự báo
 src/evaluate_forecast.py  MAE, RMSE, WAPE; chọn mô hình trên tập kiểm định
+src/build_forecast_demo.py tạo demo từ dự báo và chỉ số đã lưu
 src/visualization.py      hàm vẽ dùng chung
 notebooks/                01_eda, 02_features, 03_forecasting
 outputs/forecasts/        dự báo, chỉ số, giao thức đánh giá
@@ -56,6 +58,19 @@ Các notebook chạy theo thứ tự `01_eda` → `02_features` → `03_forecast
 
 Trên tập kiểm tra của cửa sổ chính (820 ô = 41 chuỗi × 20 ngày, 4.732 đơn), baseline `rolling_mean_7` (được chọn trên tập kiểm định) đạt MAE 1,3115, RMSE 3,2093, WAPE 22,73% ở cấp chuỗi; WAPE 14,94% sau khi cộng theo `region_id`.
 
+### Demo dự báo Jilin
+
+Tải [Demo_Du_bao_Jilin.html](outputs/forecasts/demo/Demo_Du_bao_Jilin.html) và mở bằng trình duyệt. Demo chạy offline và hỗ trợ xem số đơn thực tế, dự báo theo ngày, vùng và loại AOI. Cửa sổ chính có 820 dòng validation (5.300 đơn) và 820 dòng test (4.732 đơn). Validation so sánh trung bình trượt 7 ngày, LightGBM và XGBoost. Test hiển thị trung bình trượt 7 ngày, baseline được chọn trên validation.
+
+- [Dự báo chi tiết](outputs/forecasts/demo/Du_bao_Jilin.csv)
+- [Chỉ số đánh giá](outputs/forecasts/demo/Chi_so_Du_bao_Jilin.csv)
+
+Để tạo lại demo từ các kết quả đã lưu trong repo, chạy từ thư mục gốc:
+
+```bash
+python -m src.build_forecast_demo
+```
+
 ## Giới hạn
 
 - Cửa sổ ổn định, việc loại 8 đơn trên 24 giờ và danh mục AOI đều dựa trên toàn bộ dữ liệu quan sát, nên đánh giá mang tính hồi cứu.
@@ -66,7 +81,7 @@ Trên tập kiểm tra của cửa sổ chính (820 ô = 41 chuỗi × 20 ngày,
 
 Tâm GPS tiếp nhận của từng region là thống kê mô tả về phân bố không gian của điểm tiếp nhận; không dùng làm vị trí kho. Theo v4, hệ thống dùng một depot chung, xác định riêng bằng dữ liệu train ở bước chuẩn bị định tuyến. Hiện chưa có cấu hình CVRP hoặc vị trí depot đã fit.
 
-Danh sách cột học máy dùng chung tại `configs/forecast_features.json`, đọc qua `src.feature_schema.featureColumns()`. Cả LightGBM và XGBoost phải sử dụng danh sách này; ablation bỏ cột theo nhóm. Giữ `day_of_week` và `is_weekend` làm ứng viên RQ2. Centroid/mật độ chưa triển khai được ghi riêng là pending, không đưa vào danh sách hoạt động. Không dùng `demand`, `observed_demand` hoặc các cột đánh giá làm đầu vào.
+Danh sách cột học máy dùng chung tại `configs/forecast_features.json`, đọc qua `src.feature_schema.featureColumns()`. Cả LightGBM và XGBoost phải sử dụng danh sách này; ablation bỏ cột theo nhóm. Giữ `day_of_week` và `is_weekend` làm ứng viên RQ2. Centroid và mật độ AOI được tính từ lịch sử train phù hợp với từng dòng, như mô tả trong [thiết kế đặc trưng không gian](docs/04_spatial_ml_design.md). Không dùng `demand`, `observed_demand` hoặc các cột đánh giá làm đầu vào.
 
 ### Độ nhạy giữ đủ đơn
 
@@ -76,12 +91,9 @@ Kết quả baseline: thứ hạng sáu mô hình không đổi ở cả hai c�
 
 ### Thứ tự công việc tiếp theo
 
-1. Đồng bộ depot ở notebook/README; đọc ngày không quan sát từ audit; tests cho nội dung hiển thị; baseline A/B trước commit. Các mục này đã thực hiện trong bản cập nhật.
-2. Rà chính sách `.gitignore` và staged files trên VS Code, sau đó tạo commit nền. Bản ZIP không tạo commit thay người dùng.
-3. Hoàn thiện đặc trưng không gian từ train, dùng schema chung cho hai mô hình; huấn luyện và chọn cấu hình bằng validation.
-4. Phân tích importance/ablation, lặp A/B với LightGBM/XGBoost.
-5. Xác định ánh xạ AOI, depot chung và F/Q bằng train; kiểm tra AOI mới và AOI đa region.
-6. Chạy CVRP S0–S3 trên validation. Sau khi chốt, lưu cấu hình thực tế vào `configs/routing_locked.json` rồi commit trước khi chạy test.
+1. Lặp đánh giá độ nhạy giữ đủ đơn với LightGBM và XGBoost.
+2. Xác định ánh xạ AOI, depot chung và F/Q bằng train, rồi kiểm tra AOI mới và AOI đa region.
+3. Chạy CVRP S0–S3 trên validation. Sau khi chốt, lưu cấu hình thực tế vào `configs/routing_locked.json` rồi commit trước khi chạy test.
 
 Cấu hình định tuyến khóa phải chứa: quy tắc và phiên bản ánh xạ AOI/cụm, depot và dữ liệu train nguồn, F/Q, quy tắc chia xe/dự trữ, tách nút, phạt bỏ nút, chiến lược/timing/seed solver nếu có, đơn vị và cách làm tròn khoảng cách, lambda, epsilon Gap closed và tập ngày đánh giá. Hiện chưa tạo file `routing_locked.json` vì solver và các tham số thực tế chưa được triển khai.
 
