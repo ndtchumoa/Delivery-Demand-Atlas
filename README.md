@@ -34,6 +34,6 @@ Ba tệp được xuất vào `outputs/analysis/`:
 
 ## Mốc dự báo
 
-Notebook, mô hình, đầu ra đánh giá và demo dự báo có trong [nhánh forecast-v1](https://github.com/ndtchumoa/jilin-delivery-demand-atlas/tree/forecast-v1). Có thể tải trực tiếp [HTML dự báo](https://github.com/ndtchumoa/jilin-delivery-demand-atlas/blob/forecast-v1/outputs/forecasts/demo/forecast_jilin.html) để mở offline.
+Notebook, mô hình, đầu ra đánh giá và demo dự báo có trong [nhánh archive/demand-forecasting](https://github.com/ndtchumoa/jilin-delivery-demand-atlas/tree/archive/demand-forecasting). Có thể tải trực tiếp [HTML dự báo](https://github.com/ndtchumoa/jilin-delivery-demand-atlas/blob/archive/demand-forecasting/outputs/forecasts/demo/forecast_jilin.html) để mở offline.
 
 Tài liệu dữ liệu, H3, Leaflet và điều kiện sử dụng nền bản đồ được dẫn trong [đề cương](reports/project_proposal.md#6-tài-liệu-nền).
