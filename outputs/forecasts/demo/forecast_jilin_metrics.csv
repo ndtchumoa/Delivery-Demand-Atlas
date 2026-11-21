@@ -1,9 +1,0 @@
-scenario,split,level,model,mae,rmse,wape,rows,actual_orders
-primary_stable_period,test,series,rolling_mean_7,1.31149825784,3.20932253287,0.227267238256,820,4732
-primary_stable_period,test,region,rolling_mean_7,8.83571428571,12.2431780255,0.149378094433,80,4732
-primary_stable_period,validation,series,rolling_mean_7,1.37160278746,3.41988955952,0.212210242588,820,5300
-primary_stable_period,validation,region,rolling_mean_7,9.09821428571,12.6555727017,0.137331536388,80,5300
-primary_stable_period,validation,series,lightgbm_full,1.60753987327,3.90340857248,0.248713716241,820,5300
-primary_stable_period,validation,region,lightgbm_full,10.6341954846,13.9656259607,0.160516158259,80,5300
-primary_stable_period,validation,series,xgboost_full,1.67933327977,3.92455441099,0.259821375361,820,5300
-primary_stable_period,validation,region,xgboost_full,10.7812760785,14.1721216692,0.162736242695,80,5300
