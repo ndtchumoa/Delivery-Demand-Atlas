@@ -8,7 +8,7 @@ Visualizing Last-Mile Delivery Demand in Jilin on OpenStreetMap and Analyzing Re
 
 ## 1. Bối cảnh và mục tiêu
 
-Số đơn tổng hợp theo ngày cho biết khối lượng giao hàng. Khi kết hợp ngày tiếp nhận với vị trí giao, có thể khảo sát đơn tập trung ở đâu, phân bố thay đổi theo thời gian ra sao và những vùng nào thường tăng hoặc giảm số đơn cùng nhau. Đề tài xây dựng quy trình xử lý có thể chạy lại, một bản đồ tương tác và phân tích đa chuỗi cho bốn vùng trong dữ liệu LaDe-D tại Jilin.
+Đề tài phân tích phân bố điểm giao và biến động số đơn tiếp nhận theo ngày ở bốn vùng của Jilin. Sản phẩm gồm bản đồ tương tác và quy trình phân tích có thể tái tạo từ dữ liệu LaDe-D.
 
 | Câu hỏi nghiên cứu | Sản phẩm dùng để trả lời |
 | --- | --- |
@@ -17,12 +17,12 @@ Số đơn tổng hợp theo ngày cho biết khối lượng giao hàng. Khi k�
 
 ## 2. Dữ liệu và phạm vi
 
-- Nguồn là LaDe-D, tệp `data/raw/delivery_jl.csv`. Đơn vị quan sát là một đơn với khóa `order_id`. Nhu cầu được đo bằng số đơn tiếp nhận trong dữ liệu, phân ngày theo `ds` và phân vùng theo mã gốc `region_id`.
-- Tọa độ điểm giao `lng/lat` dùng để tổng hợp theo ô địa lý. Các trường GPS của người giao ghi nhận vị trí tại thời điểm thao tác. Bài báo LaDe ghi nhận tọa độ đã được nhiễu để bảo vệ riêng tư.
+- Tập con LaDe-D Jilin có 31.415 đơn trong tệp `data/raw/delivery_jl.csv`. Đơn vị quan sát là một đơn với khóa `order_id`. Nhu cầu được đo bằng số đơn tiếp nhận trong dữ liệu, phân ngày theo `ds` và phân vùng theo mã gốc `region_id`.
+- Tọa độ điểm giao `lng/lat` dùng để tổng hợp theo ô địa lý. Các trường GPS của người giao ghi vị trí tại thời điểm thao tác. Bài báo LaDe ghi nhận tọa độ đã được nhiễu để bảo vệ riêng tư.
 - Chuỗi chính dùng bốn mã vùng `31`, `53`, `129` và `165`. Mã vùng dùng để tổng hợp và lọc, còn đa giác hiển thị được tạo từ lưới H3.
-- Lịch từ 12/05 đến 28/10 có 170 ngày, trong đó 163 ngày có bản ghi. Repo dùng 2022 làm năm kỹ thuật vì nguồn chỉ cung cấp tháng và ngày. Các kết luận chính dùng thứ tự ngày và không dựa vào nhãn thứ trong tuần.
+- Lịch từ 12/05 đến 28/10 có 170 ngày, trong đó 163 ngày có bản ghi. Repo dùng 2022 làm năm kỹ thuật vì nguồn chỉ cung cấp tháng và ngày. Phân tích chính dùng thứ tự ngày.
 - Đếm đơn có ngày tiếp nhận hợp lệ, bao gồm những đơn có thời gian giao quá 24 giờ. Đơn thiếu tọa độ hợp lệ vẫn được đếm trong thống kê vùng. Với ngày có dữ liệu thành phố, vùng không có đơn ghi nhận được gán 0. Bảy ngày thiếu quan sát cấp thành phố được giữ là thiếu.
-- Phiên bản đầu tập trung vào trực quan hóa mô tả và tương quan giữa các chuỗi. Phân tích độ trễ là phần mở rộng. Dự báo đã hoàn thành được lưu làm kết quả bổ sung.
+- Mẫu LaDe-D chỉ gồm các đơn được ghi nhận của nhóm người giao được quan sát. Thay đổi số người giao trong mẫu có thể làm thay đổi số đơn ghi nhận theo ngày. Phân tích độ trễ là phần mở rộng.
 
 ## 3. Phương pháp
 
@@ -38,12 +38,12 @@ Bản đồ có bộ lọc khoảng ngày, vùng, loại AOI, chú giải số �
 
 ### 3.3. Thống kê đa chuỗi thời gian
 
-Với mỗi vùng, tính tổng, trung bình, trung vị, độ lệch chuẩn và số ngày bằng 0 trên tập ngày có quan sát. Vẽ bốn chuỗi trên cùng lịch ngày. Với mỗi cặp vùng, tính hệ số tương quan Pearson và số quan sát ghép cặp trên hai đầu vào:
+Với mỗi vùng, tính tổng, trung bình, trung vị, độ lệch chuẩn và số ngày bằng 0 trên tập ngày có quan sát. Vẽ bốn chuỗi trên cùng lịch ngày. Với mỗi cặp vùng, tính hệ số tương quan Pearson và số quan sát ghép cặp trên hai đại lượng.
 
 1. **Mức số đơn cùng ngày** để mô tả các ngày nhu cầu cùng cao hoặc cùng thấp.
 2. **Sai phân ngày liên tiếp** để mô tả mức đồng biến trong thay đổi số đơn. Chỉ tính sai phân nếu cả ngày hiện tại và ngày lịch liền trước đều có số liệu.
 
-Đọc hai ma trận cùng biểu đồ, ghi rõ mẫu số và kiểm tra độ nhạy bằng cửa sổ 27/06–02/10 từng được dùng ở giai đoạn dự báo. Kết quả mô tả sự liên hệ và có thể phản ánh biến động chung cấp thành phố.
+Đọc hai ma trận cùng biểu đồ, ghi rõ mẫu số và kiểm tra độ nhạy bằng cửa sổ 27/06–02/10 từng được dùng ở giai đoạn dự báo. Các hệ số mô tả mức liên hệ tuyến tính và có thể phản ánh biến động chung cấp thành phố.
 
 ## 4. Tiêu chí nghiệm thu
 
@@ -54,15 +54,7 @@ Với mỗi vùng, tính tổng, trung bình, trung vị, độ lệch chuẩn v
 | Dữ liệu bản đồ | Mỗi đơn có tọa độ hợp lệ thuộc một ô tại độ phân giải đã chọn. Tổng trên bản đồ khớp với tổng đơn đủ điều kiện khi áp cùng bộ lọc. |
 | Demo | Đổi bộ lọc cập nhật lớp ô, chú giải và thông tin ô. Có trạng thái riêng cho khoảng lọc thiếu dữ liệu. Ghi công OSM hiển thị trực tiếp trên bản đồ. |
 
-## 5. Dự kiến báo cáo
-
-1. Bối cảnh, câu hỏi nghiên cứu và dữ liệu LaDe-D.
-2. Tiền xử lý, phạm vi quan sát và đơn vị tổng hợp.
-3. Thống kê đa chuỗi, tương quan và thử độ nhạy.
-4. Thiết kế, vận hành và kiểm tra bản đồ tương tác.
-5. Kết luận theo hai câu hỏi nghiên cứu, giới hạn của mẫu và hướng mở rộng. Dự báo nằm trong phụ lục.
-
-## 6. Tài liệu nền
+## 5. Tài liệu nền
 
 - Wu và cộng sự, *LaDe: The First Comprehensive Last-mile Delivery Dataset from Industry*. [Bài báo và mô tả dữ liệu](https://arxiv.org/html/2306.10675v3).
 - Hyndman và Athanasopoulos, *Forecasting: Principles and Practice*, mục Stationarity and differencing. [Giáo trình mở](https://otexts.com/fpp3/stationarity.html).
