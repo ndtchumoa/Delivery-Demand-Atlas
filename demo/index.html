@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Atlas nhu cầu giao hàng · Jilin</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="wrap">
+      <p class="source">LaDe-D <span aria-hidden="true">/</span> Cát Lâm, Trung Quốc</p>
+      <h1>Atlas nhu cầu giao hàng Jilin</h1>
+      <p class="lede">Số đơn theo ngày tiếp nhận và vị trí giao hàng.</p>
+    </div>
+  </header>
+
+  <main class="wrap dashboard">
+    <aside aria-label="Bộ lọc và tổng quan">
+      <section class="card filters">
+        <h2>Bộ lọc</h2>
+        <form id="filters">
+          <fieldset id="filter_fields" disabled>
+            <div class="date_fields">
+              <label>Từ ngày<input id="start_date" type="date" required></label>
+              <label>Đến ngày<input id="end_date" type="date" required></label>
+            </div>
+            <label>Vùng giao hàng<select id="region"><option value="">Tất cả vùng</option></select></label>
+            <label>Loại AOI<select id="aoi"><option value="">Tất cả loại</option></select></label>
+            <button type="reset">Đặt lại bộ lọc</button>
+          </fieldset>
+        </form>
+        <p class="hint">Năm 2022 là quy ước ghi ngày của dữ liệu.</p>
+      </section>
+
+      <section class="card summary" aria-label="Số liệu sau lọc">
+        <dl>
+          <div class="total"><dt>Đơn trên bản đồ</dt><dd id="order_total">—</dd></div>
+          <div><dt>Ô có đơn</dt><dd id="cell_total">—</dd></div>
+          <div><dt>Ngày có dữ liệu</dt><dd id="day_total">—</dd></div>
+        </dl>
+        <p id="filter_status" class="hint" role="status">Đang tải dữ liệu…</p>
+      </section>
+    </aside>
+
+    <div class="content">
+      <section class="card map_card" aria-labelledby="map_title">
+        <header class="card_header">
+          <div><h2 id="map_title">Phân bố số đơn</h2><p class="hint" id="map_subtitle">Lưới H3</p></div>
+          <button id="fit_map" type="button" disabled>Về toàn vùng</button>
+        </header>
+        <div class="map_frame">
+          <div id="map" role="region" aria-label="Bản đồ số đơn theo ô H3"></div>
+          <p id="map_notice" class="map_notice" hidden></p>
+        </div>
+        <div class="map_footer">
+          <span>Số đơn mỗi ô</span>
+          <ul id="legend" aria-label="Chú giải số đơn"></ul>
+        </div>
+        <p id="tile_status" class="hint tile_status" role="status" hidden>Nền OpenStreetMap tải chưa đầy đủ. Lớp số đơn vẫn dùng được.</p>
+      </section>
+
+      <section class="card detail" aria-labelledby="detail_title">
+        <header class="card_header">
+          <div><h2 id="detail_title">Số đơn theo ngày</h2><p class="hint" id="cell_label" aria-live="polite">Chọn một ô trên bản đồ để xem chuỗi ngày.</p></div>
+          <button id="clear_cell" type="button" hidden>Bỏ chọn ô</button>
+        </header>
+        <div id="chart_area" hidden>
+          <div id="chart"></div>
+          <p class="hint chart_key"><span aria-hidden="true"></span> Vạch xám chỉ ngày thiếu quan sát. Ngày có 0 đơn nằm trên đường cơ sở.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="wrap page_footer">Nguồn số liệu <a href="https://arxiv.org/html/2306.10675v3">LaDe-D</a></footer>
+</body>
+</html>

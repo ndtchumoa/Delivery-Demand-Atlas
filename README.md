@@ -1,6 +1,12 @@
 # Atlas nhu cầu giao hàng chặng cuối tại Jilin
 
-Đồ án MI3380 phân tích số đơn tiếp nhận theo ngày của bốn vùng trong LaDe-D Jilin. Repo có quy trình tái tạo phân tích đa chuỗi và so sánh độ phân giải H3. Bản đồ tương tác trên nền OpenStreetMap sẽ hiển thị số đơn theo ô H3.
+Đồ án MI3380 phân tích số đơn tiếp nhận theo ngày của bốn vùng trong LaDe-D Jilin. Repo có quy trình tái tạo phân tích đa chuỗi và so sánh độ phân giải H3. Bản demo hiển thị số đơn theo ô H3 trên nền OpenStreetMap.
+
+## Mở bản đồ
+
+Từ thư mục gốc, chạy `python -m http.server 8000 --directory demo` rồi mở [http://localhost:8000](http://localhost:8000). Trình duyệt cần kết nối Internet để tải Leaflet 1.9.4 và nền OpenStreetMap.
+
+Bộ lọc ngày, vùng và loại AOI cập nhật tổng đơn và lớp ô. Chọn một ô để xem số đơn từng ngày theo cùng bộ lọc. Chú giải dùng các khoảng số đơn cố định để đối chiếu màu giữa các lần lọc. Bộ đếm ngày cho biết số ngày có dữ liệu trong khoảng chọn. Nền bản đồ ghi công OpenStreetMap trực tiếp trên bản đồ.
 
 ## Tái tạo phân tích
 

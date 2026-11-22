@@ -6,5 +6,5 @@
 | --- | --- | --- |
 | 1. Độ phân giải | Đã kiểm tra độ phủ và chọn H3 mức 8. | Có bảng so sánh mức 8 và 9. |
 | 2. Dữ liệu bản đồ | Đã xuất đa giác và số đơn theo ô, ngày tiếp nhận, vùng và loại AOI. | Các tệp nằm trong [demo/data](../demo/data). Tổng số đơn khớp dữ liệu nguồn khi áp cùng bộ lọc. |
-| 3. Demo | Dùng Leaflet để hiển thị GeoJSON trên nền OpenStreetMap. Thêm bộ lọc ngày, vùng, loại AOI và biểu đồ theo ngày của ô được chọn. | Bộ lọc cập nhật lớp ô và chú giải. Kiểm tra cả ngày thiếu, tập con rỗng và phần ghi công OpenStreetMap. |
+| 3. Demo | Đã hiển thị lớp ô H3 trên nền OpenStreetMap bằng Leaflet, với ba bộ lọc và biểu đồ theo ngày của ô được chọn. | Bản đồ hiển thị tổng đơn đã lọc, số ngày có dữ liệu, thông báo riêng cho thiếu quan sát và 0 đơn, cùng ghi công OpenStreetMap. |
 | 4. Báo cáo | Tổng hợp kết quả không gian và đa chuỗi theo hai câu hỏi nghiên cứu. | Báo cáo có nguồn dữ liệu, bảng và biểu đồ tái tạo được, hình demo và giới hạn diễn giải. |
