@@ -1,0 +1,6 @@
+scope,region_id,total_orders,mappable_orders,excluded_orders,missing_or_non_numeric,out_of_range,zero_pair,coverage_pct
+city,,31415,31415,0,0,0,0,100.000000
+region,31,8818,8818,0,0,0,0,100.000000
+region,53,10365,10365,0,0,0,0,100.000000
+region,129,8653,8653,0,0,0,0,100.000000
+region,165,3579,3579,0,0,0,0,100.000000

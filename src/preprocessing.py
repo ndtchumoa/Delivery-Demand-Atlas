@@ -41,6 +41,17 @@ def addDerivedColumns(df: pd.DataFrame, year: int = config.ASSUMED_YEAR) -> pd.D
     return out
 
 
+def validateDemandOrders(raw: pd.DataFrame) -> pd.DataFrame:
+    """Validate the order identity and acceptance day used for demand counts."""
+    if raw.empty or raw["order_id"].isna().any() or raw["order_id"].duplicated().any():
+        raise ValueError("Expected nonempty data with a unique, nonempty order_id for each order.")
+
+    orders = addDerivedColumns(raw)
+    if orders[DATE].isna().any() or orders["flag_ds_ne_accept_date"].any():
+        raise ValueError("Every ds date must match the order acceptance date.")
+    return orders
+
+
 def completePanel(df: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
     """Expand the observed keys across the calendar and flag cells that are filled with zero.
 

@@ -7,7 +7,7 @@ import pandas as pd
 
 from . import config
 from .data_loader import loadRawDelivery
-from .preprocessing import addDerivedColumns, completePanel
+from .preprocessing import completePanel, validateDemandOrders
 
 DATE = config.DEMAND_DATE_COLUMN
 OUTPUT_DIR = config.PROJECT_ROOT / "outputs" / "analysis"
@@ -16,13 +16,7 @@ STABLE_PERIOD = (f"{config.ASSUMED_YEAR}-06-27", f"{config.ASSUMED_YEAR}-10-02")
 
 
 def buildRegionalPanel(raw: pd.DataFrame) -> pd.DataFrame:
-    if raw.empty or raw["order_id"].isna().any() or raw["order_id"].duplicated().any():
-        raise ValueError("Expected nonempty data with a unique, nonempty order_id for each order.")
-
-    orders = addDerivedColumns(raw)
-    if orders[DATE].isna().any() or orders["flag_ds_ne_accept_date"].any():
-        raise ValueError("Every ds date must match the order acceptance date.")
-
+    orders = validateDemandOrders(raw)
     panel = completePanel(orders, ["region_id"])
     panel["demand"] = panel["demand"].where(panel["city_observed"]).astype("Int64")
     return panel[["region_id", DATE, "demand", "city_observed"]]
