@@ -10,10 +10,11 @@ Từ thư mục gốc, dùng Python 3.12 trở lên.
 python -m pip install -r requirements.txt
 python -m src.regional_time_series
 python -m src.spatial_aggregation
+python -m src.map_data
 python -m unittest discover -s tests -v
 ```
 
-Dữ liệu nguồn nằm tại [delivery_jl.csv](../data/raw/delivery_jl.csv). Các lệnh phân tích xuất bảng vào [outputs/analysis](../outputs/analysis).
+Dữ liệu nguồn nằm tại [delivery_jl.csv](data/raw/delivery_jl.csv). Các lệnh phân tích xuất bảng vào [outputs/analysis](outputs/analysis).
 
 | Tệp | Nội dung |
 | --- | --- |
@@ -25,10 +26,21 @@ Dữ liệu nguồn nằm tại [delivery_jl.csv](../data/raw/delivery_jl.csv). 
 
 Để xem biểu đồ, cài thêm `matplotlib` và `jupyter` rồi chạy hai notebook dưới đây.
 
-- [01 — Phân tích đa chuỗi theo vùng](../notebooks/01_regional_time_series.ipynb)
-- [02 — Độ phủ tọa độ và so sánh H3](../notebooks/02_spatial_coverage.ipynb)
+- [01 — Phân tích đa chuỗi theo vùng](notebooks/01_regional_time_series.ipynb)
+- [02 — Độ phủ tọa độ và so sánh H3](notebooks/02_spatial_coverage.ipynb)
+
+## Dữ liệu bản đồ
+
+Lệnh `python -m src.map_data` xuất H3 mức 8 vào [demo/data](demo/data).
+
+| Tệp | Nội dung |
+| --- | --- |
+| [h3_cells.geojson](demo/data/h3_cells.geojson) | Một đa giác cho mỗi ô có đơn. Trường `id` là mã H3 dùng để nối với dữ liệu đếm. |
+| [daily_cell_demand.json](demo/data/daily_cell_demand.json) | Lịch quan sát và số đơn tổng hợp theo ngày tiếp nhận, ô H3, vùng và loại AOI. |
+
+Trong phần `orders_by_date`, mỗi dòng có thứ tự `[h3_cell, region_id, aoi_type, orders]` và chỉ xuất khi số đơn dương. Với ngày có cờ `calendar` là `true`, tổ hợp bộ lọc không có dòng tương ứng có 0 đơn được vẽ. Ngày có cờ `false` thiếu quan sát cấp thành phố. Năm 2022 là quy ước kỹ thuật của dữ liệu.
 
 ## Tài liệu
 
-- [Đề cương](project_proposal.md) trình bày dữ liệu, phương pháp và tiêu chí nghiệm thu.
-- [Kế hoạch triển khai](implementation_plan.md) ghi các bước còn lại cho bản đồ và báo cáo.
+- [Đề cương](docs/project_proposal.md) trình bày dữ liệu, phương pháp và tiêu chí nghiệm thu.
+- [Kế hoạch triển khai](docs/implementation_plan.md) ghi các bước còn lại cho bản đồ và báo cáo.

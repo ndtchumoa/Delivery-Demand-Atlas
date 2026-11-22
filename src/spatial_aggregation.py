@@ -50,11 +50,15 @@ def auditCoordinates(orders: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     return mappable, pd.DataFrame.from_records(records)
 
 
-def countOrdersByCell(orders: pd.DataFrame, resolution: int) -> pd.Series:
+def assignH3Cells(orders: pd.DataFrame, resolution: int) -> pd.Series:
     """Assign each mappable order to exactly one cell at the requested resolution."""
     cells = [h3.latlng_to_cell(lat, lng, resolution)
              for lat, lng in zip(orders["lat"], orders["lng"])]
-    return pd.Series(cells, name="h3_cell", dtype="str").value_counts().sort_index()
+    return pd.Series(cells, index=orders.index, name="h3_cell", dtype="str")
+
+
+def countOrdersByCell(orders: pd.DataFrame, resolution: int) -> pd.Series:
+    return assignH3Cells(orders, resolution).value_counts().sort_index()
 
 
 def compareResolutions(cell_counts: dict[int, pd.Series]) -> pd.DataFrame:
