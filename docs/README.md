@@ -13,7 +13,7 @@ python -m src.spatial_aggregation
 python -m unittest discover -s tests -v
 ```
 
-Dữ liệu nguồn nằm tại [delivery_jl.csv](data/raw/delivery_jl.csv). Các lệnh phân tích xuất bảng vào [outputs/analysis](outputs/analysis).
+Dữ liệu nguồn nằm tại [delivery_jl.csv](../data/raw/delivery_jl.csv). Các lệnh phân tích xuất bảng vào [outputs/analysis](../outputs/analysis).
 
 | Tệp | Nội dung |
 | --- | --- |
@@ -25,11 +25,10 @@ Dữ liệu nguồn nằm tại [delivery_jl.csv](data/raw/delivery_jl.csv). Cá
 
 Để xem biểu đồ, cài thêm `matplotlib` và `jupyter` rồi chạy hai notebook dưới đây.
 
-- [01 — Phân tích đa chuỗi theo vùng](notebooks/01_regional_time_series.ipynb)
-- [02 — Độ phủ tọa độ và so sánh H3](notebooks/02_spatial_coverage.ipynb)
+- [01 — Phân tích đa chuỗi theo vùng](../notebooks/01_regional_time_series.ipynb)
+- [02 — Độ phủ tọa độ và so sánh H3](../notebooks/02_spatial_coverage.ipynb)
 
 ## Tài liệu
 
-- [Đề cương](reports/project_proposal.md) trình bày dữ liệu, phương pháp và tiêu chí nghiệm thu.
-- [Kế hoạch triển khai](docs/implementation_plan.md) ghi các bước còn lại cho bản đồ và báo cáo.
-- [Nhánh lưu trữ dự báo](https://github.com/ndtchumoa/jilin-delivery-demand-atlas/tree/archive/demand-forecasting) lưu notebook EDA, mã, mô hình và kết quả của giai đoạn trước. [Demo dự báo HTML](https://github.com/ndtchumoa/jilin-delivery-demand-atlas/blob/archive/demand-forecasting/outputs/forecasts/demo/forecast_jilin.html).
+- [Đề cương](project_proposal.md) trình bày dữ liệu, phương pháp và tiêu chí nghiệm thu.
+- [Kế hoạch triển khai](implementation_plan.md) ghi các bước còn lại cho bản đồ và báo cáo.
